@@ -1,12 +1,14 @@
-import { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { useThemeMode } from './hooks/useThemeMode';
-import { pageRoutes } from './config/routes';
-import ErrorBoundary from './components/ErrorBoundary';
-import LoadingState from './components/LoadingState';
-import Layout from './components/Layout';
-import Hub from './pages/Hub';
+import { Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import { useThemeMode } from "./hooks/useThemeMode";
+import { pageRoutes } from "./config/routes";
+import ErrorBoundary from "./components/ErrorBoundary";
+import LoadingState from "./components/LoadingState";
+import Layout from "./components/Layout";
+import Hub from "./pages/Hub";
+import { Helmet } from "react-helmet";
+import { useTranslation } from "react-i18next";
 
 /**
  * Main App Component
@@ -20,10 +22,14 @@ import Hub from './pages/Hub';
  */
 function App() {
   const { theme, mode, toggleTheme } = useThemeMode();
+  const { t } = useTranslation();
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <Helmet>
+        <title>{t("seo.title")}</title>
+      </Helmet>
       <ErrorBoundary>
         <BrowserRouter>
           <Layout themeMode={mode} onToggleTheme={toggleTheme}>
