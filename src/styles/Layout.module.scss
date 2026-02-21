@@ -1,0 +1,67 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  .appBar {
+    background-color: transparent;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+
+        .brandIcon {
+          font-size: 32px;
+          color: #006A6A;
+        }
+
+        .brandText {
+          font-weight: 500;
+          background: linear-gradient(135deg, #006A6A, #4DD8D5);
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+  }
+
+  .main {
+    flex: 1;
+  }
+
+  .footer {
+    padding: 24px;
+    text-align: center;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    margin-top: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .layout {
+    .appBar .toolbar {
+      padding: 8px 16px;
+
+      .brand .brandText {
+        display: none;
+      }
+    }
+  }
+}
