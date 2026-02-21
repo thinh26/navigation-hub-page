@@ -1,21 +1,26 @@
-import { useRef, useEffect } from "react";
-import { Container, Typography, Box, Paper } from "@mui/material";
+"use client";
+import { PropsWithChildren, useRef } from "react";
 import { Icon } from "@iconify/react";
-import gsap from "gsap";
-import { useLanguage } from "../hooks/useLanguage";
-import Breadcrumbs from "./Breadcrumbs";
-import styles from "../styles/PageTemplate.module.scss";
+import { gsap, useGSAP } from "@/lib/gsap";
+import styles from "@/styles/PageTemplate.module.scss";
+import { useTranslations } from "next-intl";
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
-interface PageTemplateProps {
-  children?: React.ReactNode;
-}
-
-const PageTemplate = ({ children }: PageTemplateProps) => {
-  const { t } = useLanguage();
+function PageTemplate({ children }: PropsWithChildren) {
+  const t = useTranslations();
+  const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (contentRef.current) {
+  useGSAP(
+    () => {
+      if (!contentRef.current) {
+        return;
+      }
+
       gsap.fromTo(
         contentRef.current,
         {
@@ -29,13 +34,17 @@ const PageTemplate = ({ children }: PageTemplateProps) => {
           ease: "power2.inOut",
         },
       );
-    }
-  }, []);
+    },
+    { scope: containerRef },
+  );
 
   return (
-    <Container maxWidth="xl" className={styles.pageContainer}>
+    <Container
+      ref={containerRef}
+      maxWidth="xl"
+      className={styles.pageContainer}
+    >
       <Breadcrumbs />
-
       <Paper ref={contentRef} className={styles.content}>
         {children || (
           <Box className={styles.placeholder}>
@@ -51,6 +60,6 @@ const PageTemplate = ({ children }: PageTemplateProps) => {
       </Paper>
     </Container>
   );
-};
+}
 
 export default PageTemplate;

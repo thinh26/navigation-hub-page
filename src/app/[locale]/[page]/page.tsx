@@ -1,37 +1,40 @@
-import { useEffect, useRef } from "react";
-import { Box, Typography, Button, Stack } from "@mui/material";
+"use client";
+import { useMemo, useRef } from "react";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { pageRoutes } from "@/config/routes";
 import Grid from "@mui/material/GridLegacy";
+import { gsap, useGSAP } from "@/lib/gsap";
 import { Icon } from "@iconify/react";
-import { useLanguage } from "../hooks/useLanguage";
-import gsap from "gsap";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 
-interface DetailPageLayoutProps {
-  image?: string;
-  titleKey: string;
-  categoryKey: string;
-  detailedDescriptionKey: string;
-  globalWebsiteUrl?: string;
-  vietnamWebsiteUrl?: string;
-  highlightWords?: string[];
-}
-
-const DetailPageLayout = ({
-  image,
-  titleKey,
-  detailedDescriptionKey,
-  globalWebsiteUrl,
-  vietnamWebsiteUrl,
-  highlightWords = [],
-}: DetailPageLayoutProps) => {
-  const { t } = useLanguage();
+function DetailPage() {
+  const { page } = useParams<{ page: string }>();
+  const t = useTranslations();
+  const containerRef = useRef<HTMLDivElement>(null);
   const leftColumnRef = useRef<HTMLDivElement>(null);
   const rightColumnRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    const ctx = gsap.context(() => {
+  const routeDetailInfo = useMemo(
+    () => pageRoutes.find((route) => route.path === `/${page}`),
+    [page],
+  );
+
+  const handleWebsiteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const url = event.currentTarget.getAttribute("data-website-url");
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  useGSAP(
+    () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       gsap.from(leftColumnRef.current, {
         opacity: 0,
         x: -50,
@@ -96,28 +99,12 @@ const DetailPageLayout = ({
         ease: "power3.out",
         delay: 0.7,
       });
-    });
-
-    return () => ctx.revert();
-  }, []);
-
-  const handleWebsiteClick = (url?: string) => {
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  const highlightText = (text: string, words: string[]): string => {
-    let highlighted = text;
-    words.forEach((word) => {
-      const regex = new RegExp(`(${word})`, "gi");
-      highlighted = highlighted.replace(regex, "<strong>$1</strong>");
-    });
-    return highlighted;
-  };
+    },
+    { scope: containerRef },
+  );
 
   return (
-    <Grid container spacing={4}>
+    <Grid container spacing={4} ref={containerRef}>
       <Grid item xs={12} md={5}>
         <Box
           ref={leftColumnRef}
@@ -131,8 +118,7 @@ const DetailPageLayout = ({
           <Box
             ref={imageRef}
             component="img"
-            src={image}
-            alt={t(titleKey)}
+            src={routeDetailInfo?.image}
             sx={{
               width: "100%",
               height: "auto",
@@ -149,12 +135,13 @@ const DetailPageLayout = ({
           />
 
           <Stack ref={buttonsRef} spacing={2}>
-            {globalWebsiteUrl && (
+            {routeDetailInfo?.globalWebsiteUrl && (
               <Button
                 variant="contained"
                 size="large"
+                data-website-url={routeDetailInfo.globalWebsiteUrl}
                 fullWidth
-                onClick={() => handleWebsiteClick(globalWebsiteUrl)}
+                onClick={handleWebsiteClick}
                 startIcon={<Icon icon="material-symbols:language" />}
                 sx={{
                   background: "linear-gradient(135deg, #006A6A, #4DD8D5)",
@@ -175,12 +162,13 @@ const DetailPageLayout = ({
                 {t("actions.detailGlobalWebsite")}
               </Button>
             )}
-            {vietnamWebsiteUrl && (
+            {routeDetailInfo?.vietnamWebsiteUrl && (
               <Button
                 variant="outlined"
                 size="large"
+                data-website-url={routeDetailInfo?.vietnamWebsiteUrl}
                 fullWidth
-                onClick={() => handleWebsiteClick(vietnamWebsiteUrl)}
+                onClick={handleWebsiteClick}
                 startIcon={<Icon icon="material-symbols:location-on-outline" />}
                 sx={{
                   borderColor: "#006A6A",
@@ -217,56 +205,6 @@ const DetailPageLayout = ({
             height: "100%",
           }}
         >
-          {/* Category */}
-          {/* <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
-            <Chip
-              className="chip-item"
-              label={t(categoryKey)}
-              sx={{
-                background: "rgba(0, 106, 106, 0.1)",
-                color: "#006A6A",
-                fontWeight: 500,
-                border: "1px solid rgba(0, 106, 106, 0.2)",
-                transition: "all 0.2s ease-in-out",
-                "&:hover": {
-                  background: "rgba(0, 106, 106, 0.15)",
-                  transform: "translateY(-2px)",
-                  boxShadow: 2,
-                },
-              }}
-            />
-            <Chip
-              className="chip-item"
-              label="Premium"
-              sx={{
-                background: "#FFE4B3",
-                color: "#B8860B",
-                fontWeight: 500,
-                transition: "all 0.2s ease-in-out",
-                "&:hover": {
-                  background: "#FFD699",
-                  transform: "translateY(-2px)",
-                  boxShadow: 2,
-                },
-              }}
-            />
-            <Chip
-              className="chip-item"
-              label="Featured"
-              sx={{
-                background: "#FFB3B3",
-                color: "#8B0000",
-                fontWeight: 500,
-                transition: "all 0.2s ease-in-out",
-                "&:hover": {
-                  background: "#FF9999",
-                  transform: "translateY(-2px)",
-                  boxShadow: 2,
-                },
-              }}
-            />
-          </Stack> */}
-
           <Box>
             <Typography
               className="content-title"
@@ -279,7 +217,7 @@ const DetailPageLayout = ({
                 transition: "color 0.3s ease-in-out",
               }}
             >
-              {t(titleKey)}
+              {t(routeDetailInfo?.title ?? "")}
             </Typography>
             <Typography
               className="content-description"
@@ -294,18 +232,14 @@ const DetailPageLayout = ({
                   transition: "color 0.3s ease-in-out",
                 },
               }}
-              dangerouslySetInnerHTML={{
-                __html: highlightText(
-                  t(detailedDescriptionKey),
-                  highlightWords,
-                ),
-              }}
-            />
+            >
+              {t(routeDetailInfo?.longDescription ?? "")}
+            </Typography>
           </Box>
         </Box>
       </Grid>
     </Grid>
   );
-};
+}
 
-export default DetailPageLayout;
+export default DetailPage;

@@ -1,10 +1,11 @@
 {
   "app": {
-    "title": "Navigation Hub",
+    "title": "Little Humble World",
     "subtitle": "© 2026 Nguyen Duc Thinh - All Rights Reserved."
   },
   "seo": {
-    "title": "thinh26 | Navigation Hub"
+    "title": "Duc Thinh's Little Humble World",
+    "description": "One Place. Everything Inside."
   },
   "nav": {
     "home": "Home",
@@ -19,8 +20,8 @@
     "tasks": "Tasks"
   },
   "hub": {
-    "title": "Welcome to the Hub",
-    "subtitle": "One Door. Everything Inside.",
+    "title": "Welcome to my little humble world",
+    "subtitle": "One Place. Everything Inside.",
     "search": "Search pages...",
     "noResults": "No pages found matching your search",
     "loading": "Loading pages...",

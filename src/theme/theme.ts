@@ -108,7 +108,7 @@ const darkPalette = {
 // Base theme options shared between light and dark modes
 const getBaseThemeOptions = (): ThemeOptions => ({
   typography: {
-    fontFamily: '"Google Sans Flex","Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: "var(--font-google-sans-flex, var(--font-inter))",
     h1: {
       fontSize: "2.5rem",
       fontWeight: 400,

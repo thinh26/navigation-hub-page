@@ -1,10 +1,11 @@
 {
   "app": {
-    "title": "Trung tâm điều hướng",
+    "title": "Thế giới nhỏ của mình",
     "subtitle": "© 2026 Nguyễn Đức Thịnh - Mọi quyền đều được bảo vệ."
   },
   "seo": {
-    "title": "thinh26 | Trung tâm điều hướng"
+    "title": "Đức Thịnh | Thế giới nhỏ của mình",
+    "description": "Nơi đưa bạn đến với tất cả mọi thứ  <3"
   },
   "nav": {
     "home": "Trang Chủ",
@@ -19,8 +20,8 @@
     "tasks": "Nhiệm Vụ"
   },
   "hub": {
-    "title": "Trung tâm Điều hướng",
-    "subtitle": "Cánh cửa đưa bạn đến với toàn bộ mọi thứ của mình <3",
+    "title": "Chào mừng đến với thế giới nhỏ của mình",
+    "subtitle": "Nơi đưa bạn đến với tất cả mọi thứ <3",
     "search": "Tìm kiếm trang...",
     "noResults": "Không tìm thấy trang phù hợp với tìm kiếm của bạn",
     "loading": "Đang tải trang...",

@@ -1,23 +1,30 @@
-import { useState, useRef } from "react";
-import {
-  IconButton,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Tooltip,
-} from "@mui/material";
-import { Icon } from "@iconify/react";
-import gsap from "gsap";
-import { useLanguage } from "../hooks/useLanguage";
+"use client";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import styles from "../styles/LanguageSwitcher.module.scss";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import { Icon } from "@iconify/react";
+import { useCallback, useRef, useState } from "react";
+import { gsap, useGSAP } from "@/lib/gsap";
+import MenuItem from "@mui/material/MenuItem";
+import { languageLists } from "@/i18n/settings";
+import { useParams } from "next/navigation";
 
-const LanguageSwitcher = () => {
-  const { t, currentLanguage, changeLanguage, supportedLanguages } =
-    useLanguage();
+function LanguageSwitcher() {
+  const t = useTranslations();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useParams();
+  const locale = useLocale();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const open = Boolean(anchorEl);
+
+  const { contextSafe } = useGSAP({ scope: containerRef });
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -27,62 +34,82 @@ const LanguageSwitcher = () => {
     setAnchorEl(null);
   };
 
-  const handleLanguageChange = (languageCode: string) => {
-    changeLanguage(languageCode);
+  const handleLanguageChange = (event: React.MouseEvent<HTMLLIElement>) => {
+    const selectedLanguage = event.currentTarget.dataset.language;
+    if (!selectedLanguage) return;
+    router.replace(
+      // @ts-expect-error -- TypeScript will validate that only known `params`
+      // are used in combination with a given `pathname`. Since the two will
+      // always match for the current route, we can skip runtime checks.
+      { pathname, params },
+      { locale: selectedLanguage },
+    );
     handleClose();
   };
 
-  const getCurrentLanguageIcon = () => {
-    const iconMap: Record<string, string> = {
-      en: "circle-flags:us",
-      vi: "circle-flags:vn",
-    };
-    return iconMap[currentLanguage] || "material-symbols:language";
-  };
+  const getCurrentLanguageIcon = useCallback(
+    (languageCode?: string) => {
+      const iconMap: Record<string, string> = {
+        en: "circle-flags:us",
+        vi: "circle-flags:vn",
+      };
+      if (!languageCode) {
+        return iconMap[locale] || "material-symbols:language";
+      }
 
-  const handleMouseEnter = () => {
-    if (buttonRef.current) {
-      gsap.to(buttonRef.current, {
+      return iconMap[languageCode] || "material-symbols:language";
+    },
+    [locale],
+  );
+
+  const handleMouseEnter = contextSafe(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const target = event.currentTarget;
+      gsap.to(target, {
         scale: 1.1,
         duration: 0.2,
         ease: "power2.out",
       });
-    }
-  };
+    },
+  );
 
-  const handleMouseLeave = () => {
-    if (buttonRef.current) {
-      gsap.to(buttonRef.current, {
+  const handleMouseLeave = contextSafe(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const target = event.currentTarget;
+      gsap.to(target, {
         scale: 1,
         duration: 0.2,
         ease: "power2.out",
       });
-    }
-  };
+    },
+  );
 
-  const handleMenuItemMouseEnter = (event: React.MouseEvent<HTMLLIElement>) => {
-    gsap.to(event.currentTarget, {
-      backgroundColor: "rgba(0, 0, 0, 0.04)",
-      duration: 0.2,
-      ease: "power2.inOut",
-    });
-  };
+  const handleMenuItemMouseEnter = contextSafe(
+    (event: React.MouseEvent<HTMLLIElement>) => {
+      gsap.to(event.currentTarget, {
+        backgroundColor: "rgba(0, 0, 0, 0.04)",
+        duration: 0.2,
+        ease: "power2.inOut",
+      });
+    },
+  );
 
-  const handleMenuItemMouseLeave = (event: React.MouseEvent<HTMLLIElement>) => {
-    gsap.to(event.currentTarget, {
-      backgroundColor: "transparent",
-      duration: 0.2,
-      ease: "power2.inOut",
-    });
-  };
+  const handleMenuItemMouseLeave = contextSafe(
+    (event: React.MouseEvent<HTMLLIElement>) => {
+      gsap.to(event.currentTarget, {
+        backgroundColor: "transparent",
+        duration: 0.2,
+        ease: "power2.inOut",
+      });
+    },
+  );
 
   return (
-    <div className={styles.languageSwitcher}>
+    <div ref={containerRef} className={styles.languageSwitcher}>
       <Tooltip title={t("language.select")}>
         <IconButton
-          ref={buttonRef}
-          onClick={handleClick}
           size="large"
+          onClick={handleClick}
           aria-label={t("accessibility.languageMenu")}
           aria-controls={open ? "language-menu" : undefined}
           aria-haspopup="true"
@@ -99,29 +126,26 @@ const LanguageSwitcher = () => {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "language-button",
+        slotProps={{
+          list: {
+            "aria-labelledby": "language-button",
+          },
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {supportedLanguages.map((language) => (
+        {languageLists.map((language) => (
           <MenuItem
             key={language.code}
-            onClick={() => handleLanguageChange(language.code)}
-            selected={currentLanguage === language.code}
+            data-language={language.code}
+            onClick={handleLanguageChange}
+            selected={locale === language.code}
             className={styles.menuItem}
             onMouseEnter={handleMenuItemMouseEnter}
             onMouseLeave={handleMenuItemMouseLeave}
           >
             <ListItemIcon>
-              <Icon
-                icon={
-                  language.code === "en" ? "circle-flags:us" : "circle-flags:vn"
-                }
-                width={24}
-                height={24}
-              />
+              <Icon icon={getCurrentLanguageIcon(language.code)} />
             </ListItemIcon>
             <ListItemText>{language.nativeName}</ListItemText>
           </MenuItem>
@@ -129,6 +153,6 @@ const LanguageSwitcher = () => {
       </Menu>
     </div>
   );
-};
+}
 
 export default LanguageSwitcher;

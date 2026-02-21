@@ -1,63 +1,26 @@
-import { useState, useMemo, useRef, useEffect } from "react";
-import {
-  Container,
-  Typography,
-  TextField,
-  InputAdornment,
-  Box,
-  Tabs,
-  Tab,
-} from "@mui/material";
+"use client";
+import { useState, useMemo, useRef } from "react";
 import Grid from "@mui/material/GridLegacy";
+import { useTranslations } from "next-intl";
 import { Icon } from "@iconify/react";
-import gsap from "gsap";
-import { useLanguage } from "../hooks/useLanguage";
-import { pageRoutes } from "../config/routes";
-import NavigationCard from "../components/NavigationCard";
-import styles from "../styles/Hub.module.scss";
+import styles from "@/styles/Hub.module.scss";
+import { pageRoutes } from "@/config/routes";
+import { gsap, useGSAP } from "@/lib/gsap";
+import NavigationCard from "@/components/NavigationCard";
+import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
-const Hub = () => {
-  const { t } = useLanguage();
+export default function Hub() {
+  const t = useTranslations();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterTab, setFilterTab] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const cardsGridRef = useRef<HTMLDivElement>(null);
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-  };
-
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setFilterTab(newValue);
-  };
-
-  const handleTabMouseEnter = (event: React.MouseEvent<HTMLElement>) => {
-    const target = event.currentTarget;
-    const tabIndex = Number(target.getAttribute("data-tab-index"));
-    const isSelected = target.getAttribute("data-selected") === "true";
-
-    if (!isSelected && !isNaN(tabIndex)) {
-      gsap.to(event.currentTarget, {
-        // color: "#006A6A",
-        opacity: 0.7,
-        duration: 0.2,
-        ease: "power2.inOut",
-      });
-    }
-  };
-
-  const handleTabMouseLeave = (event: React.MouseEvent<HTMLElement>) => {
-    const target = event.currentTarget;
-    const tabIndex = Number(target.getAttribute("data-tab-index"));
-    const isSelected = target.getAttribute("data-selected") === "true";
-    if (!isSelected && !isNaN(tabIndex)) {
-      gsap.to(event.currentTarget, {
-        // color: "inherit",
-        opacity: 1,
-        duration: 0.2,
-        ease: "power2.inOut",
-      });
-    }
-  };
 
   const categories = useMemo(() => {
     const uniqueCategories = Array.from(
@@ -79,7 +42,7 @@ const Hub = () => {
       routes = routes.filter(
         (route) =>
           t(route.title).toLowerCase().includes(query) ||
-          t(route.description).toLowerCase().includes(query) ||
+          t(route.shortDescription).toLowerCase().includes(query) ||
           t(route.category).toLowerCase().includes(query),
       );
     }
@@ -87,26 +50,70 @@ const Hub = () => {
     return routes;
   }, [searchQuery, filterTab, categories, t]);
 
-  useEffect(() => {
-    if (cardsGridRef.current) {
-      gsap.fromTo(
-        cardsGridRef.current,
-        {
-          opacity: 0,
-          y: 20,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
+  const { contextSafe } = useGSAP(
+    () => {
+      if (cardsGridRef.current) {
+        gsap.fromTo(
+          cardsGridRef.current,
+          {
+            opacity: 0,
+            y: 20,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            ease: "power2.inOut",
+          },
+        );
+      }
+    },
+    { dependencies: [filteredRoutes], scope: containerRef },
+  );
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setFilterTab(newValue);
+  };
+
+  const handleTabMouseEnter = contextSafe(
+    (event: React.MouseEvent<HTMLElement>) => {
+      const target = event.currentTarget;
+      const tabIndex = Number(target.getAttribute("data-tab-index"));
+      const isSelected = target.getAttribute("data-selected") === "true";
+
+      if (!isSelected && !isNaN(tabIndex)) {
+        gsap.to(target, {
+          // color: "#006A6A",
+          opacity: 0.7,
+          duration: 0.2,
           ease: "power2.inOut",
-        },
-      );
-    }
-  }, [filteredRoutes]);
+        });
+      }
+    },
+  );
+
+  const handleTabMouseLeave = contextSafe(
+    (event: React.MouseEvent<HTMLElement>) => {
+      const target = event.currentTarget;
+      const tabIndex = Number(target.getAttribute("data-tab-index"));
+      const isSelected = target.getAttribute("data-selected") === "true";
+      if (!isSelected && !isNaN(tabIndex)) {
+        gsap.to(target, {
+          // color: "inherit",
+          opacity: 1,
+          duration: 0.2,
+          ease: "power2.inOut",
+        });
+      }
+    },
+  );
 
   return (
-    <Container maxWidth="xl" className={styles.hubContainer}>
+    <Container ref={containerRef} maxWidth="xl" className={styles.hubContainer}>
       <Box className={styles.header}>
         <Typography variant="h3" component="h1" className={styles.title}>
           {t("hub.title")}
@@ -126,12 +133,14 @@ const Hub = () => {
           placeholder={t("hub.search")}
           value={searchQuery}
           onChange={handleSearchChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Icon icon="material-symbols:search" />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Icon icon="material-symbols:search" />
+                </InputAdornment>
+              ),
+            },
           }}
           className={styles.searchField}
           aria-label={t("accessibility.searchInput")}
@@ -183,6 +192,4 @@ const Hub = () => {
       )}
     </Container>
   );
-};
-
-export default Hub;
+}

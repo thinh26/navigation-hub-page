@@ -5,10 +5,10 @@
 export interface PageRoute {
   path: string;
   title: string;
-  description: string;
+  shortDescription: string;
+  longDescription: string;
   icon: string;
   category: string;
-  component: React.ComponentType;
   image: string;
   globalWebsiteUrl?: string;
   vietnamWebsiteUrl?: string;
